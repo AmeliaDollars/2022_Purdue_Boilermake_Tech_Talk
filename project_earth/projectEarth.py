@@ -54,16 +54,21 @@ class projectEarth():
         # Build our URL with API key, query the endpoint, and convert the return data in to a usable list
         available_dates_dict = self.fetch_json_from_url(available_dates_dict_url)
         
+        # Initalize our image dictionaries
         if self.natural_image_dict is None:
             self.natural_image_dict = {}
         if self.enhanced_image_dict is None:
             self.enhanced_image_dict = {}
         
+        # Loop through the available dates
         for date in available_dates_dict:
 
+            # Create our URL for fetching all the images available on a specific date
             date_text = date['date']
             natural_url = f'{self.root_url}/natural/date/{date_text}?api_key={self.NASA_API_TOKEN}'
             enhanced_url = f'{self.root_url}/enhanced/date/{date_text}?api_key={self.NASA_API_TOKEN}'
+            
+            # Only attempt to index previously indexed dates
             if date_text not in self.natural_image_dict:
                 print(f'fetching natural date: {date_text}')
                 self.natural_image_dict[date_text] = [{}]
@@ -71,6 +76,7 @@ class projectEarth():
                 for item in temp_natural_image_list:
                     self.natural_image_dict[date_text].append(item)
                 
+                # Store our indexed data om a local file
                 self.__store_data_in_file('natural_images.pk',self.natural_image_dict)
             else:
                 print(f'Already indexed natural {date}')
@@ -91,6 +97,8 @@ class projectEarth():
         print(f'found {len(self.natural_image_dict)} natural images and {len(self.enhanced_image_dict)}')
 
     def download_epic_dscovr_files(self,type='natural'):
+        # We have two types of images provided by the EPIC DSCOVR satellite. 
+        # It's important to keep them separated. 
         if type == 'natural':
             for date in self.natural_image_dict:
                 for item in self.natural_image_dict[date]:
@@ -101,40 +109,48 @@ class projectEarth():
                     self.download_epic_dscovr_item(item,'enhanced',date)
 
         print('Finished downloading all indexed EPIC DSCOVR images')    
-        
+
     def download_epic_dscovr_item(self,item,type,date):
+        # Make sure we have a valid item before even trying anything
         if len(item) < 1:
             return None
-        date_key = date.replace('-','/')
-        date_folder = date.replace('-','')
         
-        temp = item['image']
-        filename = f'{temp}.png'
-
+        # Set auxilary variables
+        temp_filename = item['image']
+        filename = f'{temp_filename}.png'
+    
+        # Construct our URL, see https://api.nasa.gov/ for documentation
+        date_key = date.replace('-','/')
         url = f'{self.archive_url}/{type}/{date_key}/png/{filename}?api_key={self.NASA_API_TOKEN}'
         
+        # Create our folder structure for the downloaded images
+        date_folder = date.replace('-','')
         output_folder = f'./epic_dscovr/{type}/{date_folder}'
         if not os.path.isdir(output_folder):
             os.makedirs(output_folder)
 
+        # Create our now completed local path for downloading our image
         output_filepath = f'{output_folder}/{filename}'
+        
+        # Validate if the image has been downloaded or not yet
         if not os.path.isfile(output_filepath):
-
             print(f'Downloading {filename} to {output_folder}...')
             self.download_image(url,output_filepath)
         else:
             print(f'Previously downloaded {filename} to {output_folder}')
 
     def fetch_json_from_url(self,url):
+        # Implement GET request and load the JSON to an object
         output = requests.get(url)
         return json.loads(output.text)
 
     def __store_data_in_file(self,filename,data):
-        # Dump the data in to a file
+        # Dump the data in to pickle a file
         with open(filename,'wb') as fi:
             pickle.dump(data,fi)
     
     def __fetch_data_from_file(self,filename):
+        # Retrieve our pickle file to an object
         output = None
         try:
             with open(filename,'rb') as fi:
@@ -145,9 +161,10 @@ class projectEarth():
         return output
 
     def download_image(self,target_url,output_filepath):
-        
+        # Fetch our target_url
         response = requests.get(target_url, stream=True)
 
+        # Write our image to a file
         with open(output_filepath, "wb") as file:
             response.raw.decode_content = True
             shutil.copyfileobj(response.raw, file)
