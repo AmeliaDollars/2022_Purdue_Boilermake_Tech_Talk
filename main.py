@@ -13,10 +13,10 @@ epic_dscovr = projectEarth(apiType.EPICDSCOVR)
 
 # Oh an error, that's simple enough to fix, we need to set our environment variable for our nasa api token
 # It's easy to sign up for a key, can go do so right now
-os.environ['NASA_API_TOKEN'] = '8o7OIi9IEIfzpyWNncaYmdFAZGwPg02P9nP3glaB'
+os.environ['NASA_API_TOKEN'] = ''
 epic_dscovr = projectEarth(apiType.EPICDSCOVR)
 
-# epic_dscovr.index()
-epic_dscovr.download_epic_dscovr_files()
+epic_dscovr.index()
+# epic_dscovr.download_epic_dscovr_files()
 
 
