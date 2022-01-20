@@ -6,6 +6,7 @@ import os
 import json
 import pickle
 import shutil
+import subprocess
 
 from enum import Enum
 
@@ -172,15 +173,40 @@ class projectEarth():
             response.raw.decode_content = True
             shutil.copyfileobj(response.raw, file)
     
-    def sort_epic_dscovr_images_in_to_buckets(self,type='natural',time_step_in_minutes=None):
+    def make_epic_dscovr_video(self,type='natural',time_step_in_minutes=None):
         # This function will sort our images in to a bucket with proper naming
-
+        picture_root_folder = f'./epic_dscovr/{type}'
+        list_of_pictures = []
         if type == 'natural':
             for item in self.natural_image_dict:
-                time = self.natural_image_dict[item]['identifier']
-                print(time)
-            
-        # Use type to determine with self.list to get
-    
-    def make_epic_dscovr_video(self,type='natural'):
-        self.sort_epic_dscovr_images_in_to_buckets()
+                for picture in self.natural_image_dict[item]:
+                    
+                    date_folder = item.replace('-','')
+                    time = picture['identifier']
+                    filename = picture['image']
+                    local_filepath = f'{picture_root_folder}/{date_folder}/{filename}.png'
+                    
+                    if not os.path.isfile(local_filepath):
+                        print(f'Missing local copy of {local_filepath}')
+                        date_key = item.replace('-','/')
+                        url = f'{self.archive_url}/{type}/{date_key}/png/{filename}?api_key={self.NASA_API_TOKEN}'
+                        self.download_image(url,local_filepath)
+                    
+                    list_of_pictures.append((time,local_filepath))
+        list_of_pictures.sort()
+
+        photo_output_folder = 'output'
+        if not os.path.isdir(photo_output_folder):
+            os.mkdir(photo_output_folder)
+        
+        for index,photo in enumerate(list_of_pictures):
+            source_path = photo[1]
+            filename = str(index).zfill(4)
+            destination_path = f'{photo_output_folder}/img{filename}.png'
+            shutil.copy(source_path, destination_path)
+
+        # command_to_make_video = 'ffmpeg -i img%07d.png -framerate 24 output.mp4'
+        command_to_make_video = ['ffmpeg', '-framerate', '10', '-i', f'{photo_output_folder}/img%04d.png',  f'{photo_output_folder}/output.mp4']
+        subprocess.Popen(command_to_make_video).wait()
+
+        print('Finished kicking off making the requested video')

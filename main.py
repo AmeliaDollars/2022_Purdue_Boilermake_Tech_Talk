@@ -29,6 +29,6 @@ if args['action'] is not None:
     if args['action'] == 'video':
         epic_dscovr.make_epic_dscovr_video()
 else:
-    epic_dscovr.make_epic_dscovr_video()
     epic_dscovr.index()
-    epic_dscovr.download_epic_dscovr_files()
+    # epic_dscovr.download_epic_dscovr_files()
+    epic_dscovr.make_epic_dscovr_video()
