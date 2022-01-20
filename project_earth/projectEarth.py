@@ -33,10 +33,10 @@ class projectEarth():
             return None
     
     def setup_epic_dscovr(self):
-        self.root_url = 'https://api.nasa.gov/EPIC/api'
-        # self.root_url = 'https://epic.gsfc.nasa.gov/api'
-        self.archive_url = 'https://api.nasa.gov/EPIC/archive'
-        # self.archive_url = 'https://epic.gsfc.nasa.gov/archive'
+        # self.root_url = 'https://api.nasa.gov/EPIC/api'
+        self.root_url = 'https://epic.gsfc.nasa.gov/api'
+        # self.archive_url = 'https://api.nasa.gov/EPIC/archive'
+        self.archive_url = 'https://epic.gsfc.nasa.gov/archive'
         if self.product_type is apiType.EPICDSCOVR:
             self.natural_image_dict = self.__fetch_data_from_file('natural_images.pk')
             self.enhanced_image_dict = self.__fetch_data_from_file('enhanced_images.pk')
@@ -64,6 +64,9 @@ class projectEarth():
         for date in available_dates_dict:
 
             # Create our URL for fetching all the images available on a specific date
+            if 'error' in date:
+                print('You are being rate limited, slow down partner!')
+                break
             date_text = date['date']
             natural_url = f'{self.root_url}/natural/date/{date_text}?api_key={self.NASA_API_TOKEN}'
             enhanced_url = f'{self.root_url}/enhanced/date/{date_text}?api_key={self.NASA_API_TOKEN}'
@@ -71,7 +74,7 @@ class projectEarth():
             # Only attempt to index previously indexed dates
             if date_text not in self.natural_image_dict:
                 print(f'fetching natural date: {date_text}')
-                self.natural_image_dict[date_text] = [{}]
+                self.natural_image_dict[date_text] = []
                 temp_natural_image_list = self.fetch_json_from_url(natural_url)
                 for item in temp_natural_image_list:
                     self.natural_image_dict[date_text].append(item)
@@ -168,4 +171,16 @@ class projectEarth():
         with open(output_filepath, "wb") as file:
             response.raw.decode_content = True
             shutil.copyfileobj(response.raw, file)
-        
+    
+    def sort_epic_dscovr_images_in_to_buckets(self,type='natural',time_step_in_minutes=None):
+        # This function will sort our images in to a bucket with proper naming
+
+        if type == 'natural':
+            for item in self.natural_image_dict:
+                time = self.natural_image_dict[item]['identifier']
+                print(time)
+            
+        # Use type to determine with self.list to get
+    
+    def make_epic_dscovr_video(self,type='natural'):
+        self.sort_epic_dscovr_images_in_to_buckets()

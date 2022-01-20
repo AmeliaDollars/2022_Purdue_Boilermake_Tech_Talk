@@ -1,6 +1,11 @@
 from project_earth.projectEarth import projectEarth
 from project_earth.projectEarth import apiType
 import os
+import argparse
+
+parser = argparse.ArgumentParser(description='Demo for downloading images from NASA API')
+parser.add_argument('-a','--action', help='foo help', default=None)
+args = vars(parser.parse_args())
 
 # Demo of what it looks like to have handling for not inputing an api type
 # This allows for adding additional apis to this project
@@ -13,10 +18,17 @@ epic_dscovr = projectEarth(apiType.EPICDSCOVR)
 
 # Oh an error, that's simple enough to fix, we need to set our environment variable for our nasa api token
 # It's easy to sign up for a key, can go do so right now
-os.environ['NASA_API_TOKEN'] = ''
+os.environ['NASA_API_TOKEN'] = 'DEMO_KEY'
 epic_dscovr = projectEarth(apiType.EPICDSCOVR)
 
-epic_dscovr.index()
-# epic_dscovr.download_epic_dscovr_files()
-
-
+if args['action'] is not None:
+    if args['action'] == 'index':
+        epic_dscovr.index()
+    if args['action'] == 'download':
+        epic_dscovr.download_epic_dscovr_files()
+    if args['action'] == 'video':
+        epic_dscovr.make_epic_dscovr_video()
+else:
+    epic_dscovr.make_epic_dscovr_video()
+    epic_dscovr.index()
+    epic_dscovr.download_epic_dscovr_files()
