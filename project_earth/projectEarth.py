@@ -54,7 +54,6 @@ class projectEarth():
 
     def index(self):
         if self.product_type is apiType.EPICDSCOVR:
-            self.setup_epic_dscovr()
             print(f"Indexing target {self.product_type.value}")
             self.index_epic_dscovr()
 
