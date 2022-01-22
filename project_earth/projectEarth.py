@@ -97,7 +97,7 @@ class projectEarth():
 
             if date_text not in self.enhanced_image_dict:
                 print(f'fetching enhanced date: {date_text}')
-                self.enhanced_image_dict[date_text] = [{}]
+                self.enhanced_image_dict[date_text] = []
 
                 temp_enhanced_image_list = self.fetch_json_from_url(
                     enhanced_url)
