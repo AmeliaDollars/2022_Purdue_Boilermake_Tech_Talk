@@ -9,7 +9,7 @@ from project_earth.projectEarth import apiType
 
 parser = argparse.ArgumentParser(
     description='Demo for downloading images from NASA API')
-parser.add_argument('-a', '--action', help='foo help', default=None)
+parser.add_argument('-a', '--action', help='index, download, video', default=None)
 args = vars(parser.parse_args())
 
 # Demo of what it looks like to have handling for not inputing an api type
